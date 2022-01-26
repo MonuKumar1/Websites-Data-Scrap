@@ -1,0 +1,27 @@
+<!-- =========== Header  Section=============== -->
+
+{% extends "base2.html" %} {% block content %}
+
+<div style="color: rgb(10, 7, 8); text-align: center; padding-top: 1%">
+  <h3>Enter the Websites</h3>
+  <form id="forum">
+    <textarea name="message" cols="33" rows="12" id="message"></textarea>
+    <br />
+    <button id="onsub" style="cursor: pointer;">Submit</button>
+  </form>
+
+  <div>
+    <a style="display: none" id="dwnlod" href="#">Download</a>
+  </div>
+
+</div>
+
+<div id="overlay">
+	<div class="cv-spinner">
+	  <span class="spinner"></span>
+	</div>
+  </div>
+
+{% endblock %}
+
+<!-- =========== Footer Section ============== -->
