@@ -1,22 +1,26 @@
+from time import sleep
+from wsgiref import headers
 from flask import Flask, render_template, request, redirect, json, send_from_directory
 import requests as r 
 from bs4 import BeautifulSoup
 from openpyxl import Workbook
 import os
 from urllib.parse import urlparse
-
+from time import sleep
 app = Flask(__name__, static_url_path='', static_folder='static')
 
 app.config['APP_ROOT'] = os.path.dirname(os.path.abspath(__file__))
 
-print(app.static_url_path)
-print(app.static_folder)
-print(app.root_path)
+# print(app.static_url_path)
+# print(app.static_folder)
+# print(app.root_path)
 
 
 ROOT_URL = 'https://www.sitelike.org/'
 
-session = r.Session()
+headers= {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"}
+
+# session = r.Session()
 
 @app.route('/')
 def home():
@@ -40,8 +44,8 @@ def submit():
         SLUG_URL = urlparse(SLUG_URL).netloc
         SLUG_URL = SLUG_URL.replace("www.","")
         # print(SLUG_URL)
-
-        s = session.get(ROOT_URL + 'similar/' +SLUG_URL)
+        sleep(3)
+        s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
         contents = BeautifulSoup(s.content, 'html.parser')
         panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
         for block in panels_blocks:
@@ -84,7 +88,8 @@ def page_not_found(e):
 
 
 
-
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0', port=80)
 
 if __name__ == '__main__':
     app.run(debug=True)
