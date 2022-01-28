@@ -4,6 +4,7 @@ from datetime import datetime
 from wsgiref import headers
 from flask import Flask, render_template, request, json, send_from_directory
 import requests as r 
+from threading import *
 from bs4 import BeautifulSoup
 # from openpyxl import Workbook
 import pygsheets
@@ -41,6 +42,35 @@ def submit():
     URLS = data['urls']
     URLS = URLS.split(" ")
 
+
+    sheet_url=[]
+
+    t1 = Thread(target=main_scrape,args=[sheet_url,URLS])
+    # t1 = Thread(target=main_scrape,args=[url,query])
+    t1.start()
+    while len(sheet_url) == 0:
+        None
+    # text = (','.join(URLS))
+    # if len(text) > 45:
+    #     text = text[0:45] + '...'
+    # data = {'sheets_url':sheet_url[0], 'query_str': text}
+    # return render_template(request,'home2.html',data)
+    print(sheet_url[0])
+    return {"gsheet_link": sheet_url[0]}
+
+
+# def call_scrape(sheet_url,URLS):
+#     wks_title = ''
+#     for i in URLS:
+#         wks_title = wks_title + '_' + i.split(' ')[0]
+#     wks_title = wks_title[1:]
+#     k = 1
+#     for i in URLS:
+#         k,wks_title = main_scrape(sheet_url,i,wks_title,k)
+
+
+def main_scrape(sheet_url,URLS):
+
     gs = pygsheets.authorize(service_file='service_account_sheets.json')
     try:
         sh = gs.open(title='SiteLike Links')
@@ -53,36 +83,43 @@ def submit():
     print("sheet done")
     print(sh.url)    
             
-    for URL in URLS:
-        print("working on wesite: ", URL)
+    for URL1 in URLS:
+        print("working on wesite: ", URL1)
         websites=[]
-        sleep(3)
+        # sleep(3)
 
         # removing http:// and https:// and www. from the SLUG_URL using urlparse
         # SLUG_URL = urlparse(SLUG_URL).netloc
-        SLUG_URL = URL.replace("http://","").replace("https://","").replace("www.","")
+        SLUG_URL = URL1.replace("http://","").replace("https://","").replace("www.","")
         # print("SLUG_URL: ",SLUG_URL)    
         print("scraping: ",SLUG_URL)
         website = SLUG_URL
         print("SLug url in var: ", website)
 
         s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
-        contents = BeautifulSoup(s.content, 'html.parser')
-        panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
 
         worksheet_title = SLUG_URL.split(".")[0] + str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
-        wks = sh.add_worksheet(title=worksheet_title, rows=len(panels_blocks)+5, cols=2)
+        wks = sh.add_worksheet(title=worksheet_title)
         col_name = "Results for "+ str(SLUG_URL)
         wks.update_value('A1', col_name)
         wks.cell('A1').set_text_format('bold', value=True) 
 
         print("worksheet title: ",worksheet_title)
 
-        if URL == URLS[0]:
+        contents = BeautifulSoup(s.content, 'html.parser')
+        panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
+
+
+        if URL1 == URLS[0]:
+            # print("appending")
             sheet_link = sh.url + '/view#gid=' + str(wks.id)
+            sheet_url.append(sheet_link)
+            # print("appended")
 
         i = 2    
+        # print("going in block loop")
         for block in panels_blocks:
+            # print("inside block loop")
             links = block.find_all('a', class_ = 'btn btn-link btn-lg')
             website_name = links[0].text.split('\n')[1]
             website_sitelike_url = links[0].get('href')
@@ -100,10 +137,12 @@ def submit():
 
     
         gsheet_link = sh.url + '/view#gid=' + str(wks.id)
-        print('Sheet Link for', website, ': ', gsheet_link) 
+        print('Sheet Link for', website, ': ', gsheet_link)
 
 
     return {"gsheet_link": sheet_link}
+
+
 
 
 
