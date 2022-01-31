@@ -134,7 +134,7 @@ def main_scrape(sheet_url,URLS):
             # i = 2    
             # print("going in block loop")
             for block in panels_blocks:
-                sleep(3)
+                # sleep(3)
                 # print("inside block loop")
                 links = block.find_all('a', class_ = 'btn btn-link btn-lg')
                 website_name = links[0].text.split('\n')[1]
