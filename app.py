@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, json, send_from_directory
 import requests as r 
 from threading import *
 from bs4 import BeautifulSoup
+from flask import jsonify
 # from openpyxl import Workbook
 import pygsheets
 import os
@@ -59,14 +60,7 @@ def submit():
     return {"gsheet_link": sheet_url[0]}
 
 
-# def call_scrape(sheet_url,URLS):
-#     wks_title = ''
-#     for i in URLS:
-#         wks_title = wks_title + '_' + i.split(' ')[0]
-#     wks_title = wks_title[1:]
-#     k = 1
-#     for i in URLS:
-#         k,wks_title = main_scrape(sheet_url,i,wks_title,k)
+
 
 
 def main_scrape(sheet_url,URLS):
@@ -80,67 +74,92 @@ def main_scrape(sheet_url,URLS):
         # sh.share('store3age@gmail.com',role='writer',type='user')
         sh.share('', role='reader', type='anyone')
 
+
+    try:
+        gs = pygsheets.authorize(service_file='service_account_sheets.json')
+    except Exception as e:
+        print(e)
+        return  jsonify({"status": "error", "message": "Error in connecting to google sheets"})
     print("sheet done")
     print(sh.url)    
-            
-    for URL1 in URLS:
-        print("working on wesite: ", URL1)
+
+    worksheet_title = "Srcrapped_at"+  "__"+ str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
+    wks = sh.add_worksheet(title=worksheet_title)
+    wks.update_value('A1', "Similar Websites")
+    wks.cell('A1').set_text_format('bold', value=True) 
+    print("worksheet title: ",worksheet_title)    
+
+    sheet_link = sh.url + '/view#gid=' + str(wks.id)  
+
+    try:
+
         websites=[]
-        # sleep(3)
+        for URL1 in URLS:
+            print("working on wesite: ", URL1)
+            
+            sleep(3)
 
-        # removing http:// and https:// and www. from the SLUG_URL using urlparse
-        # SLUG_URL = urlparse(SLUG_URL).netloc
-        SLUG_URL = URL1.replace("http://","").replace("https://","").replace("www.","")
-        # print("SLUG_URL: ",SLUG_URL)    
-        print("scraping: ",SLUG_URL)
-        website = SLUG_URL
-        print("SLug url in var: ", website)
+            # removing http:// and https:// and www. from the SLUG_URL using urlparse
+            # SLUG_URL = urlparse(SLUG_URL).netloc
+            SLUG_URL = URL1.replace("http://","").replace("https://","").replace("www.","")
+            # print("SLUG_URL: ",SLUG_URL)    
+            print("scraping: ",SLUG_URL)
+            # website = SLUG_URL
+            # print("SLug url in var: ", website)
 
-        s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
+            s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
+            contents = BeautifulSoup(s.content, 'html.parser')
+            panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
+            # worksheet_title = "Srcrapped_at"+  "__"+ str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
+            # worksheet_title = SLUG_URL.split(".")[0] + str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
+            # wks = sh.add_worksheet(title=worksheet_title)
+            
+            # col_name = "Results for "+ str(SLUG_URL)
+            # wks.update_value('A1',"Similar Websites")
+            # wks.cell('A1').set_text_format('bold', value=True) 
 
-        worksheet_title = SLUG_URL.split(".")[0] + str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
-        wks = sh.add_worksheet(title=worksheet_title)
-        col_name = "Results for "+ str(SLUG_URL)
-        wks.update_value('A1', col_name)
-        wks.cell('A1').set_text_format('bold', value=True) 
+            # print("worksheet title: ",worksheet_title)
 
-        print("worksheet title: ",worksheet_title)
-
-        contents = BeautifulSoup(s.content, 'html.parser')
-        panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
-
-
-        if URL1 == URLS[0]:
-            # print("appending")
-            sheet_link = sh.url + '/view#gid=' + str(wks.id)
-            sheet_url.append(sheet_link)
-            # print("appended")
-
-        i = 2    
-        # print("going in block loop")
-        for block in panels_blocks:
-            # print("inside block loop")
-            links = block.find_all('a', class_ = 'btn btn-link btn-lg')
-            website_name = links[0].text.split('\n')[1]
-            website_sitelike_url = links[0].get('href')
-            website_url = website_name
-            if len(links)>1:
-                website_url = links[1].get('href')
-            websites.append(website_url)
-            # wks.append_table(values=[[website_name, website_url, website_sitelike_url]])
-
-            row = 'A' + str(i)
-            wks.update_value(row, website_url)
-            i = i+1
-            print("data added to sheet for website: ",website_url)
-            # print(website_name,'----->', website_sitelike_url, '----->',website_url)
-
-    
-        gsheet_link = sh.url + '/view#gid=' + str(wks.id)
-        print('Sheet Link for', website, ': ', gsheet_link)
+            # sheet_link = sh.url + '/view#gid=' + str(wks.id)
+            # contents = BeautifulSoup(s.content, 'html.parser')
+            # panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
 
 
-    return {"gsheet_link": sheet_link}
+            # if URL1 == URLS[0]:
+            #     # print("appending")
+            #     sheet_link = sh.url + '/view#gid=' + str(wks.id)
+            #     sheet_url.append(sheet_link)
+                # print("appended")
+
+            # i = 2    
+            # print("going in block loop")
+            for block in panels_blocks:
+                # print("inside block loop")
+                links = block.find_all('a', class_ = 'btn btn-link btn-lg')
+                website_name = links[0].text.split('\n')[1]
+                website_sitelike_url = links[0].get('href')
+                website_url = website_name
+                if len(links)>1:
+                    website_url = links[1].get('href')
+                websites.append(website_url)
+                # wks.append_table(values=[[website_name, website_url, website_sitelike_url]])
+
+                # row = 'A' + str(i)
+                # wks.update_value(row, website_url)
+                # i = i+1
+                print("data added to sheet for website: ",website_url)
+                # print(website_name,'----->', website_sitelike_url, '----->',website_url)
+
+        
+            gsheet_link = sh.url + '/view#gid=' + str(wks.id)
+            print('Sheet Link for', SLUG_URL, ': ', gsheet_link)
+        wks.insert_cols(1, number=len(websites), values=websites, inherit=False)
+
+        return {"gsheet_link": sheet_link}
+
+    except Exception as e:
+        print(e)
+        return  jsonify({"status": "error", "message": "Error in Scrapping data"})
 
 
 

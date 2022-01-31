@@ -69,6 +69,20 @@ $('#onsub').click(function (e) {
             $('#dwnlod').attr('download','urls.xlsx');
             $("#overlay").fadeOut(300);
         }
+        // console.log('responce received')
+        //     console.log(response)
+        //     if (response.status == 'error') {
+        //         console.log('error')
+        //         $("#overlay").fadeOut(300);
+        //         alert(response.message)
+        //     }else{
+        //         $('#dwnlod').css('display', 'block')
+        //         $('#dwnlod').attr('href', response.gsheet_link);
+        //         $('#dwnlod').attr('download','urls.xlsx');
+        //         $("#overlay").fadeOut(300);
+        //     }
+
+        // }
     });
 
      
