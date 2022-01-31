@@ -97,7 +97,7 @@ def main_scrape(sheet_url,URLS):
         for URL1 in URLS:
             print("working on wesite: ", URL1)
             
-            # sleep(20)
+            # sleep()
 
             # removing http:// and https:// and www. from the SLUG_URL using urlparse
             # SLUG_URL = urlparse(SLUG_URL).netloc
@@ -154,7 +154,9 @@ def main_scrape(sheet_url,URLS):
         
             gsheet_link = sh.url + '/view#gid=' + str(wks.id)
             print('Sheet Link for', SLUG_URL, ': ', gsheet_link)
+        sleep(10)
         wks.insert_cols(1, number=len(websites), values=websites, inherit=False)
+        sleep(2)
 
         return {"gsheet_link": sheet_link}
 
