@@ -97,7 +97,7 @@ def main_scrape(sheet_url,URLS):
         for URL1 in URLS:
             print("working on wesite: ", URL1)
             
-            # sleep()
+            sleep(10)
 
             # removing http:// and https:// and www. from the SLUG_URL using urlparse
             # SLUG_URL = urlparse(SLUG_URL).netloc
