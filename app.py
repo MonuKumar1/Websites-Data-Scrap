@@ -106,7 +106,7 @@ def main_scrape(sheet_url,URLS):
             print("scraping: ",SLUG_URL)
             # website = SLUG_URL
             # print("SLug url in var: ", website)
-            sleep(10)
+            # sleep(10)
             s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
             contents = BeautifulSoup(s.content, 'html.parser')
             panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
@@ -154,9 +154,9 @@ def main_scrape(sheet_url,URLS):
         
             gsheet_link = sh.url + '/view#gid=' + str(wks.id)
             print('Sheet Link for', SLUG_URL, ': ', gsheet_link)
-        # sleep(10)
+        sleep(10)
         wks.insert_cols(1, number=len(websites), values=websites, inherit=False)
-        # sleep(2)
+        sleep(2)
 
         return {"gsheet_link": sheet_link}
 
