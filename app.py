@@ -85,7 +85,7 @@ def main_scrape(sheet_url,URLS):
     print(sh.url)    
 
     worksheet_title = "Srcrapped_at"+  "__"+ str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
-    wks = sh.add_worksheet(title=worksheet_title)
+    wks = sh.add_worksheet(title=worksheet_title,cols=2)
     wks.update_value('A1', "Similar Websites")
     wks.cell('A1').set_text_format('bold', value=True) 
     print("worksheet title: ",worksheet_title)    
@@ -159,7 +159,10 @@ def main_scrape(sheet_url,URLS):
             gsheet_link = sh.url + '/view#gid=' + str(wks.id)
             print('Sheet Link for', SLUG_URL, ': ', gsheet_link)
         # sleep(10)
-        wks.insert_cols(1, number=len(websites), values=websites, inherit=False)
+        # wks.insert_cols(1, number=len(websites), values=websites, inherit=False)
+        wks.insert_cols(1, number=2, values=websites, inherit=False)
+        # wks.insertRows(wks.getLastRow(), websites.length)
+
         # sleep(2)
 
         return {"gsheet_link": sheet_link}
