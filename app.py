@@ -113,7 +113,7 @@ def main_scrape(sheet_url,URLS):
             # sleep(10)
             s = r.get(ROOT_URL + 'similar/' +SLUG_URL,headers=headers)
             contents = BeautifulSoup(s.content, 'html.parser')
-            panels_blocks = contents.find_all('div', class_='row panel panel-default rowP')
+            panels_blocks = contents.find_all('div', class_='panel panel-default rowP')
             # worksheet_title = "Srcrapped_at"+  "__"+ str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
             # worksheet_title = SLUG_URL.split(".")[0] + str( datetime.now().strftime("%Y-%m-%d %H:%M:%S") )
             # wks = sh.add_worksheet(title=worksheet_title)
